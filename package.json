@@ -1,6 +1,6 @@
 {
   "name": "@glitchr/infinity",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "Infinite scroll library",
   "main": "src/index.js",
   "repository": {
