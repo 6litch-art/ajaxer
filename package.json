@@ -1,10 +1,10 @@
 {
-  "name": "@glitchr/infinity",
+  "name": "@glitchr/ajaxer",
   "version": "1.0.18",
-  "description": "Infinite scroll library",
+  "description": "Ajax library",
   "main": "src/index.js",
   "repository": {
-    "url": "ssh://git@gitlab.glitchr.dev:public-repository/javascript/infinity.git",
+    "url": "ssh://git@gitlab.glitchr.dev:public-repository/javascript/ajaxer.git",
     "type": "git"
   },
   "author": "Marco Meyer <marco.meyer@glitchr.io>",
