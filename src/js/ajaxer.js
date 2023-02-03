@@ -31,13 +31,14 @@
     Ajaxer.version = '0.1.0';
 
     var Settings = Ajaxer.settings = {
-
+        method:"POST",
+        output:"json"
     };
 
     var debug = false;
     var ready = false;
     Ajaxer.clear = function() {
-        
+
     }
 
     Ajaxer.ready = function (list = {}, options = {}) {
@@ -46,7 +47,7 @@
             debug = options["debug"];
 
         Ajaxer.configure(options);
-        if(list.length) 
+        if(list.length)
             Ajaxer.configure({list: list});
 
         ready = true;
@@ -58,21 +59,21 @@
     };
 
     Ajaxer.get = function(key) {
-    
-        if(key in Ajaxer.settings) 
+
+        if(key in Ajaxer.settings)
             return Ajaxer.settings[key];
 
         return null;
     };
 
     Ajaxer.set = function(key, value) {
-    
+
         Ajaxer.settings[key] = value;
         return this;
     };
 
     Ajaxer.add = function(key, value) {
-    
+
         if(! (key in Ajaxer.settings))
             Ajaxer.settings[key] = [];
 
@@ -86,7 +87,7 @@
 
         if(key in Ajaxer.settings) {
 
-            Ajaxer.settings[key] = Ajaxer.settings[key].filter(function(setting, index, arr){ 
+            Ajaxer.settings[key] = Ajaxer.settings[key].filter(function(setting, index, arr){
                 return value != setting;
             });
 
@@ -109,25 +110,30 @@
         return this;
     };
 
-    Ajaxer.getRandomColor = function(hex = '0123456789ABCDEF', alpha = 1) {
-
-        var color = '#';
-
-        for (var i = 0; i < 6; i++)
-            color += hex[Math.floor(Math.random() * hex.length)];
-
-        alpha = hex[Math.floor(alpha * hex.length)];
-
-        return color + alpha + alpha;
-    }
-
     Ajaxer.onLoad = function ()
     {
-        Ajaxer.clear();
+        Ajaxer.ready();
+    }
 
-        $(window).on('click', Ajaxer.onClick);
-        $(window).on("mouseup", Ajaxer.onMouseUp)
-        $(window).on("mousedown", Ajaxer.onMouseDown)
+    Ajaxer.setMethod = function(type)
+    {
+        Ajaxer.set("method", type);
+    }
+
+    Ajaxer.setOutput = function(type)
+    {
+        Ajaxer.set("output", dataType);
+    }
+
+    Ajaxer.send = function(url, data = {}, successCallback = function() {}, errorCallback = function() {} )
+    {
+        $.ajax({
+            url: url,
+            type: Ajaxer.get("method"),
+            dataType: Ajaxer.get("output"),
+            data: data,
+            success: successCallback,
+            error: errorCallback});
     }
 
     $(window).on("load", function() { Ajaxer.onLoad(); });
