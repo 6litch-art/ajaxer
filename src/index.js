@@ -1,2 +1,2 @@
 import './css/index.css';
-import './js/infinity.js';
+import './js/ajaxer.js';

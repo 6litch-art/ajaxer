@@ -1,7 +1,7 @@
 {
   "name": "@glitchr/ajaxer",
   "version": "1.0.18",
-  "description": "Ajax library",
+  "description": "AJAX query library",
   "main": "src/index.js",
   "repository": {
     "url": "ssh://git@gitlab.glitchr.dev:public-repository/javascript/ajaxer.git",
