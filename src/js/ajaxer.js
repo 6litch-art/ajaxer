@@ -114,7 +114,7 @@
     {
         Ajaxer.ready();
     }
- 
+
     Ajaxer.setMethod = function(type)
     {
         Ajaxer.set("method", type);
