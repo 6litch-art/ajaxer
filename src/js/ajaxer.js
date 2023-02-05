@@ -120,20 +120,58 @@
         Ajaxer.set("method", type);
     }
 
+    Ajaxer.setUrl = function(url)
+    {
+        Ajaxer.set("url", url);
+    }
+
     Ajaxer.setOutput = function(type)
     {
         Ajaxer.set("output", dataType);
     }
 
-    Ajaxer.send = function(url, data = {}, successCallback = function() {}, errorCallback = function() {} )
+    Ajaxer.setTarget = function(el)
     {
-        $.ajax({
-            url: url,
-            type: Ajaxer.get("method"),
-            dataType: Ajaxer.get("output"),
-            data: data,
-            success: successCallback,
-            error: errorCallback});
+        Ajaxer.set("target", el);
+    }
+
+    Ajaxer.send = function(data = {}, success = function() {}, error = function() {}, complete = function() {})
+    {
+        if(Ajaxer.get("url") == undefined) console.error("No target URL provided.");
+        else {
+
+            var target = Ajaxer.get("target") || this;
+            $(target).removeClass (function (index, className) {
+                return (className.match (/(^|\s)ajaxer-\S+/g) || []).join(' ');
+            });
+
+            target.addClass("ajaxer-call");
+
+            $.ajax({
+                url: Ajaxer.get("url"),
+                type: Ajaxer.get("method"),
+                dataType: Ajaxer.get("output"),
+                data: data,
+                success: function(...args) {
+
+                    target.addClass("ajaxer-success");
+                    success.call(this, ...args);
+
+                }.bind(Ajaxer.get("target") || this),
+                error: function(...args) {
+
+                    target.addClass("ajaxer-error");
+                    error.call(this, ...args);
+
+                }.bind(Ajaxer.get("target") || this),
+                complete: function(...args) {
+
+                    target.removeClass("ajaxer-call");
+                    complete.call(this, ...args);
+
+                }.bind(Ajaxer.get("target") || this)
+            });
+        }
     }
 
     $(window).on("load", function() { Ajaxer.onLoad(); });
