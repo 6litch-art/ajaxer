@@ -32,13 +32,40 @@
 
     var Settings = Ajaxer.settings = {
         method:"POST",
-        output:"json"
+        output:"json",
+        debounce:0,
     };
 
     var debug = false;
     var ready = false;
     Ajaxer.clear = function() {
 
+    }
+
+    var debounceTimer;
+    Ajaxer.debounce = function (func, timeout = null){
+
+        timeout = timeout ?? Ajaxer.get("debounce");
+
+        return (...args) => {
+
+            if(timeout == 0) return func.apply(this, args);
+
+            if(typeof(debounceTimer) != "undefined") clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => { func.apply(this, args); }, Ajaxer.parseTime(timeout));
+        };
+    }
+
+    Ajaxer.parseTime = function(str) {
+
+        var array = String(str).split(", ");
+        array = array.map(function (t) {
+
+            if (String(t).endsWith("ms")) return parseFloat(String(t)) / 1000;
+            return parseFloat(String(t));
+        });
+
+        return Math.max(...array);
     }
 
     Ajaxer.ready = function (list = {}, options = {}) {
@@ -135,43 +162,71 @@
         Ajaxer.set("target", el);
     }
 
+    Ajaxer.setDebounce = function(debounce)
+    {
+        Ajaxer.set("debounce", debounce)
+    }
+
+    var nQueries = 0;
+    Ajaxer.setQueryLimit = function(queryLimit)
+    {
+        Ajaxer.set("query_limit", queryLimit);
+    }
+
     Ajaxer.send = function(data = {}, success = function() {}, error = function() {}, complete = function() {})
     {
-        if(Ajaxer.get("url") == undefined) console.error("No target URL provided.");
-        else {
+        return Ajaxer.debounce(() => function() {
 
-            var target = Ajaxer.get("target") || this;
-            $(target).removeClass (function (index, className) {
-                return (className.match (/(^|\s)ajaxer-\S+/g) || []).join(' ');
-            });
+            if(Ajaxer.get("url") == undefined) console.error("No target URL provided.");
+            else {
 
-            target.addClass("ajaxer-call");
+                var target = $(Ajaxer.get("target") || this);
+                target.removeClass (function (index, className) {
+                    return (className.match (/(^|\s)ajaxer-\S+/g) || []).join(' ');
+                });
 
-            $.ajax({
-                url: Ajaxer.get("url"),
-                type: Ajaxer.get("method"),
-                dataType: Ajaxer.get("output"),
-                data: data,
-                success: function(...args) {
+                $(target).addClass("ajaxer-call");
 
-                    target.addClass("ajaxer-success");
-                    success.call(this, ...args);
+                var queryLimit = parseInt(Ajaxer.get("query_limit")) ?? -1;
+                if(nQueries < queryLimit || queryLimit < 0) {
 
-                }.bind(Ajaxer.get("target") || this),
-                error: function(...args) {
+                    nQueries++;
+                    $.ajax({
+                        url: Ajaxer.get("url"),
+                        type: Ajaxer.get("method"),
+                        dataType: Ajaxer.get("output"),
+                        data: data,
+                        success: function(...args) {
 
-                    target.addClass("ajaxer-error");
-                    error.call(this, ...args);
+                            $(this).each(function() {
+                                $(this).addClass("ajaxer-success");
+                                success.call(this, ...args);
+                            })
 
-                }.bind(Ajaxer.get("target") || this),
-                complete: function(...args) {
+                        }.bind(target),
+                        error: function(...args) {
 
-                    target.removeClass("ajaxer-call");
-                    complete.call(this, ...args);
+                            $(this).each(function() {
+                                $(this).addClass("ajaxer-error");
+                                error.call(this, ...args);
+                            });
 
-                }.bind(Ajaxer.get("target") || this)
-            });
-        }
+                        }.bind(target),
+                        complete: function(...args) {
+
+                            $(this).each(function() {
+                                $(this).removeClass("ajaxer-call");
+                                complete.call(this, ...args);
+                            });
+
+                            nQueries--;
+
+                        }.bind(target)
+                    });
+                }
+            }
+
+        }.bind(this)())();
     }
 
     $(window).on("load", function() { Ajaxer.onLoad(); });
