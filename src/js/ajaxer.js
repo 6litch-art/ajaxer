@@ -187,8 +187,8 @@
 
                 $(target).addClass("ajaxer-call");
 
-                var queryLimit = parseInt(Ajaxer.get("query_limit")) ?? -1;
-                if(nQueries < queryLimit || queryLimit < 0) {
+                var queryLimit = parseInt(Ajaxer.get("query_limit"));
+                if(nQueries < queryLimit || isNaN(queryLimit)) {
 
                     nQueries++;
                     $.ajax({
