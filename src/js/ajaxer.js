@@ -30,16 +30,17 @@
     var Ajaxer = window.Ajaxer = {};
     Ajaxer.version = '0.1.0';
 
-    var Settings = Ajaxer.settings = {
+    var defaultAjaxer  = {
         method:"POST",
         output:"json",
         debounce:0,
     };
 
+    Ajaxer.settings = defaultAjaxer;
     var debug = false;
     var ready = false;
     Ajaxer.clear = function() {
-
+        Ajaxer.settings = defaultAjaxer;
     }
 
     var debounceTimer;
@@ -129,10 +130,10 @@
         var key, value;
         for (key in options) {
             value = options[key];
-            if (value !== undefined && options.hasOwnProperty(key)) Settings[key] = value;
+            if (value !== undefined && options.hasOwnProperty(key)) Ajaxer.settings[key] = value;
         }
 
-        if (debug) console.log("Ajaxer configuration: ", Settings);
+        if (debug) console.log("Ajaxer configuration: ", Ajaxer.settings);
 
         return this;
     };
