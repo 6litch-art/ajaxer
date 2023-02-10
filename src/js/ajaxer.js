@@ -247,6 +247,7 @@
 
                     loader = $(document.createElement("div"));
                     loader.addClass("ajaxer-loader");
+                    loader.append("<span class='ajaxer-status'></span>")
                     $("body").append(loader);
 
                     Ajaxer.set("loader["+name+"]", loader);
@@ -264,9 +265,10 @@
                 if(queryList[name].length < queryLimit || isNaN(queryLimit)) {
 
                     $(target).addClass("ajaxer-call");
-                    var loaderTimeout = setTimeout(function() {
+                    var loaderTimeout = undefined;
+                    // setTimeout(function() {
                         $(loader).addClass("ajaxer-call");
-                    }, Ajaxer.get("loader_debounce"));
+                    // }, Ajaxer.get("loader_debounce"));
 
                     var xhr = $.ajax({
                         url: Ajaxer.get("url["+name+"]"),
@@ -293,11 +295,13 @@
                                 error.call(this, ...args);
                             });
 
+                            $(loader).find(".ajaxer-status").html(args[0].responseJSON);
+
                         }.bind(target),
 
                         complete: function(...args) {
 
-                            $(loader).removeClass("ajaxer-call");
+                            // $(loader).removeClass("ajaxer-call");
                             $(this).each(function() {
 
                                 $(this).removeClass("ajaxer-call");
