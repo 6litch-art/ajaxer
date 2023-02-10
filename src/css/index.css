@@ -18,6 +18,8 @@
     text-align:justify;
 }
 
+.ajaxer-loader { display: none; }
+.ajaxer-loader.ajaxer-call:hover { background-color:#FCFCFCEE; cursor:pointer; }
 .ajaxer-loader.ajaxer-call {
     position: absolute;
     top: 50%;
@@ -31,13 +33,14 @@
 
     min-height: 60px;
     min-width: 60px;
-    transition: width 1s ease;
     border-radius:30px;
     box-shadow: 1px 1px 5px #0001;
     z-index:10;
 
 }
+
 .ajaxer-loader:after {
+
     animation: 0.5s linear infinite ajaxerLoader;
     animation-play-state: inherit;
     border: solid 5px #cfd0d1;

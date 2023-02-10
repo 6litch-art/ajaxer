@@ -34,6 +34,7 @@
         method:"POST",
         output:"json",
         loader_debounce:2000,
+        retry_limit:2,
         debounce:0,
     };
 
@@ -164,6 +165,11 @@
         Ajaxer.set("debounce["+name+"]", debounce)
     }
 
+    Ajaxer.setRetryLimit = function(name, retryLimit)
+    {
+        Ajaxer.set("retry_limit["+name+"]", retryLimit)
+    }
+
     Ajaxer.setQueryLimit = function(name, queryLimit)
     {
         Ajaxer.set("query_limit["+name+"]", queryLimit);
@@ -222,7 +228,7 @@
         queryList[name].push(xhr);
     }
 
-    Ajaxer.complete = function(xhr)
+    Ajaxer.unregister = function(xhr)
     {
         Object.entries(queryList).forEach(([_name,xhrList]) => {
 
@@ -238,80 +244,91 @@
 
         return Ajaxer.debounce(name, () => function() {
 
-            if(Ajaxer.get("url["+name+"]") == undefined) console.error("No target URL provided.");
+            if (Ajaxer.get("url[" + name + "]") == undefined) console.error("No target URL provided.");
             else {
 
-                var target = $(Ajaxer.get("target["+name+"]") || this);
-                var loader = $(Ajaxer.get("loader["+name+"]"));
+                var target = $(Ajaxer.get("target[" + name + "]") || this);
+                var loader = $(Ajaxer.get("loader[" + name + "]"));
                 if (loader.length == 0) {
 
                     loader = $(document.createElement("div"));
                     loader.addClass("ajaxer-loader");
                     loader.append("<span class='ajaxer-status'></span>")
+
                     $("body").append(loader);
 
-                    Ajaxer.set("loader["+name+"]", loader);
+                    Ajaxer.set("loader[" + name + "]", loader);
                 }
 
                 loader = loader[0];
-                target.removeClass (function (index, className) {
-                    return (className.match (/(^|\s)ajaxer-\S+/g) || []).join(' ');
+                target.removeClass(function (index, className) {
+                    return (className.match(/(^|\s)ajaxer-\S+/g) || []).join(' ');
                 });
 
-                if(!(name in queryList))
+                if (!(name in queryList))
                     queryList[name] = [];
 
-                var queryLimit = parseInt(Ajaxer.get("query_limit["+name+"]"));
-                if(queryList[name].length < queryLimit || isNaN(queryLimit)) {
+                var queryLimit = parseInt(Ajaxer.get("query_limit[" + name + "]"));
+                if (queryList[name].length < queryLimit || isNaN(queryLimit)) {
 
                     $(target).addClass("ajaxer-call");
-                    var loaderTimeout = undefined;
-                    // setTimeout(function() {
+                    var loaderTimeout = setTimeout(function () {
                         $(loader).addClass("ajaxer-call");
-                    // }, Ajaxer.get("loader_debounce"));
+                    }, Ajaxer.get("loader_debounce"));
 
                     var xhr = $.ajax({
-                        url: Ajaxer.get("url["+name+"]"),
-                        type: Ajaxer.get("method["+name+"]") ?? Ajaxer.get("method"),
-                        dataType: Ajaxer.get("output["+name+"]") ?? Ajaxer.get("output"),
+                        url: Ajaxer.get("url[" + name + "]"),
+                        type: Ajaxer.get("method[" + name + "]") ?? Ajaxer.get("method"),
+                        dataType: Ajaxer.get("output[" + name + "]") ?? Ajaxer.get("output"),
                         data: data,
-                        success: function(...args) {
+                        tryCount : 0,
+                        retryLimit : Ajaxer.get("retry_limit[" + name + "]") ?? Ajaxer.get("retry_limit"),
+                        success: function (...args) {
 
                             $(loader).addClass("ajaxer-success");
-                            $(this).each(function() {
+                            $(loader).removeClass("ajaxer-call");
+                            $(target).each(function () {
 
-                                $(this).addClass("ajaxer-success");
-                                success.call(this, ...args);
-                            })
-
-                        }.bind(target),
-
-                        error: function(...args) {
-
-                            $(loader).addClass("ajaxer-error");
-                            $(this).each(function() {
-
-                                $(this).addClass("ajaxer-error");
-                                error.call(this, ...args);
+                                $(target).addClass("ajaxer-success");
+                                success.call(target, ...args);
                             });
 
+                            Ajaxer.unregister(xhr);
+                        },
+
+                        error: function (...args) {
+
+                            $(loader).addClass("ajaxer-call");
                             $(loader).find(".ajaxer-status").html(args[0].responseJSON);
 
-                        }.bind(target),
-
-                        complete: function(...args) {
-
-                            // $(loader).removeClass("ajaxer-call");
-                            $(this).each(function() {
-
-                                $(this).removeClass("ajaxer-call");
-                                clearTimeout(loaderTimeout);
-                                complete.call(this, ...args);
+                            $(loader).one("click touchstart", function () {
+                                $(loader).removeClass("ajaxer-call");
                             });
 
-                            Ajaxer.complete(xhr);
+                            if (++this.tryCount < this.retryLimit) {
+                                $.ajax(this);
+                                return;
+                            }
 
-                        }.bind(target)
+                            $(loader).addClass("ajaxer-error");
+                            $(target).each(function () {
+
+                                $(target).addClass("ajaxer-error");
+                                error.call(target, ...args);
+                            });
+
+                            Ajaxer.unregister(xhr);
+                        },
+
+                        complete: function (...args) {
+
+                            $(target).each(function () {
+
+                                $(target).removeClass("ajaxer-call");
+                                clearTimeout(loaderTimeout);
+                                complete.call(target, ...args);
+                            });
+                        }
                     });
 
                     Ajaxer.register(name, xhr);
