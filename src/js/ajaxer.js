@@ -305,7 +305,7 @@
                             $(loader).one("click touchstart", function () {
                                 $(loader).removeClass("ajaxer-call");
                             });
-
+ gi
                             if (++this.tryCount < this.retryLimit) {
                                 $.ajax(this);
                                 return;
