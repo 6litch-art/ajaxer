@@ -298,6 +298,7 @@
 
                         error: function (...args) {
 
+                            clearTimeout(loaderTimeout);
                             $(loader).addClass("ajaxer-call");
                             $(loader).find(".ajaxer-status").html(args[0].responseJSON);
 
@@ -322,10 +323,10 @@
 
                         complete: function (...args) {
 
+                            clearTimeout(loaderTimeout);
                             $(target).each(function () {
 
                                 $(target).removeClass("ajaxer-call");
-                                clearTimeout(loaderTimeout);
                                 complete.call(target, ...args);
                             });
                         }
