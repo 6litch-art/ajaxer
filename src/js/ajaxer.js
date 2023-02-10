@@ -163,6 +163,11 @@
         Ajaxer.set("target", el);
     }
 
+    Ajaxer.setLoader = function(el)
+    {
+        Ajaxer.set("loader", el);
+    }
+
     Ajaxer.setDebounce = function(debounce)
     {
         Ajaxer.set("debounce", debounce)
@@ -182,14 +187,29 @@
             else {
 
                 var target = $(Ajaxer.get("target") || this);
+                var loader = $(Ajaxer.get("loader"));
+                if (loader.length == 0) {
+
+                    loader = $(document.createElement("div"));
+                    loader.addClass("ajaxer-loader");
+                    $("body").append(loader);
+
+                    Ajaxer.set("loader", loader);
+                }
+
+                loader = loader[0];
+                console.log(loader);
                 target.removeClass (function (index, className) {
                     return (className.match (/(^|\s)ajaxer-\S+/g) || []).join(' ');
                 });
 
-                $(target).addClass("ajaxer-call");
-
                 var queryLimit = parseInt(Ajaxer.get("query_limit"));
                 if(nQueries < queryLimit || isNaN(queryLimit)) {
+
+                    $(target).addClass("ajaxer-call");
+                    var loaderTimeout = setTimeout(function() {
+                        $(loader).addClass("ajaxer-call");
+                    }, 2000);
 
                     nQueries++;
                     $.ajax({
@@ -201,6 +221,7 @@
 
                             $(this).each(function() {
                                 $(this).addClass("ajaxer-success");
+                                $(loader).addClass("ajaxer-success");
                                 success.call(this, ...args);
                             })
 
@@ -209,6 +230,7 @@
 
                             $(this).each(function() {
                                 $(this).addClass("ajaxer-error");
+                                $(loader).addClass("ajaxer-error");
                                 error.call(this, ...args);
                             });
 
@@ -217,6 +239,8 @@
 
                             $(this).each(function() {
                                 $(this).removeClass("ajaxer-call");
+                                $(loader).removeClass("ajaxer-call");
+                                clearTimeout(loaderTimeout);
                                 complete.call(this, ...args);
                             });
 
