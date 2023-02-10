@@ -33,6 +33,7 @@
     var defaultAjaxer  = {
         method:"POST",
         output:"json",
+        cancelable: false,
         retry_limit:1,
         debounce:1000,
         debounce_loader:2000,
@@ -155,6 +156,11 @@
         Ajaxer.set("target["+name+"]", el);
     }
 
+    Ajaxer.cancelable = function(name, cancelable = true)
+    {
+        Ajaxer.set("cancelable["+name+"]", true);
+    }
+
     Ajaxer.setLoader = function(name, el)
     {
         Ajaxer.set("loader["+name+"]", el);
@@ -215,7 +221,7 @@
         var iKill = 0;
         while (queryList[name].length > 0 && (iKill++ < nKill || nKill < 0))
         {
-            var xhr = queryList[name].shift();
+            var xhr = queryList[name].shift(); // @TODO: implement mutex with unregister
                 xhr.abort();
         }
     }
@@ -269,8 +275,13 @@
                     queryList[name] = [];
 
                 var queryLimit = parseInt(Ajaxer.get("query_limit[" + name + "]"));
-                if (queryList[name].length >= queryLimit && !isNaN(queryLimit))
+                if (queryList[name].length >= queryLimit && !isNaN(queryLimit)) {
+
+                    var cancelable = Ajaxer.get("cancelable["+name+"]") ?? Ajaxer.get("cancelable");
+                    if (!cancelable) return;
+
                     Ajaxer.abort(name, queryList[name].length - queryLimit + 1);
+                }
 
                 $(target).addClass("ajaxer-call");
                 var loaderTimeout = setTimeout(function () {
