@@ -151,6 +151,11 @@
         Ajaxer.set("output["+name+"]", dataType);
     }
 
+    Ajaxer.getTarget = function(name)
+    {
+        return Ajaxer.get("target["+name+"]");
+    }
+
     Ajaxer.setTarget = function(name, el)
     {
         Ajaxer.set("target["+name+"]", el);
@@ -189,11 +194,11 @@
 
         return (...args) => {
 
-            timeout = timeout ?? Ajaxer.get("debounce["+name+"]") ?? Ajaxer.get("debounce");
-            if(timeout == 0) return func.apply(this, args);
+            timeout = Ajaxer.parseTime(timeout ?? Ajaxer.get("debounce["+name+"]") ?? Ajaxer.get("debounce"));
+            if(timeout == 0 || debounceTimer[name] == undefined) timeout = 1; // timeout not working if 0.. :o)
 
             if(typeof(debounceTimer[name]) != "undefined") clearTimeout(debounceTimer[name]);
-            debounceTimer[name] = setTimeout(() => { func.apply(this, args); }, Ajaxer.parseTime(timeout));
+            debounceTimer[name] = setTimeout(() => { func.apply(this, args); }, timeout);
         };
     }
 

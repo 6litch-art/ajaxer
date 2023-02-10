@@ -18,7 +18,12 @@
     text-align:justify;
 }
 
-.ajaxer-loader { display: none; }
+.ajaxer-loader {
+    transition: opacity 0.25s ease-out;
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+}
 .ajaxer-loader.ajaxer-call:hover { background-color:#FCFCFCEE; cursor:pointer; }
 .ajaxer-loader.ajaxer-call {
     position: absolute;
@@ -31,15 +36,17 @@
     justify-content: center;
     align-items: center;
 
+    height: auto;
     min-height: 60px;
     min-width: 60px;
     border-radius:30px;
     box-shadow: 1px 1px 5px #0001;
     z-index:10;
 
+    opacity:1;
 }
 
-.ajaxer-loader:after {
+.ajaxer-loader.ajaxer-call:after {
 
     animation: 0.5s linear infinite ajaxerLoader;
     animation-play-state: inherit;
