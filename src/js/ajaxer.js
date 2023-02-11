@@ -36,7 +36,7 @@
         cancelable: false,
         retry_limit:1,
         debounce:1000,
-        debounce_loader:2000,
+        loader_debounce:1500,
     };
 
     Ajaxer.settings = defaultAjaxer;
@@ -166,14 +166,18 @@
         Ajaxer.set("cancelable["+name+"]", true);
     }
 
-    Ajaxer.setLoader = function(name, el)
-    {
-        Ajaxer.set("loader["+name+"]", el);
-    }
-
     Ajaxer.setDebounce = function(name, debounce)
     {
         Ajaxer.set("debounce["+name+"]", debounce)
+    }
+    Ajaxer.setLoaderDebounce = function(name, debounce)
+    {
+        Ajaxer.set("loader_debounce["+name+"]", debounce)
+    }
+
+    Ajaxer.setLoaderContainer = function(name, el)
+    {
+        Ajaxer.set("loader_container["+name+"]", el);
     }
 
     Ajaxer.setRetryLimit = function(name, retryLimit)
@@ -259,16 +263,18 @@
             else {
 
                 var target = $(Ajaxer.get("target[" + name + "]") || this);
-                var loader = $(Ajaxer.get("loader[" + name + "]"));
+                var loaderContainer = Ajaxer.get("loader_container[" + name + "]")
+                        ?? (Ajaxer.get("target[" + name + "]") || this);
+
+                var loader = $(loaderContainer).find(" .ajaxer-loader");
                 if (loader.length == 0) {
 
                     loader = $(document.createElement("div"));
                     loader.addClass("ajaxer-loader");
                     loader.append("<span class='ajaxer-status'></span>")
 
-                    $("body").append(loader);
-
-                    Ajaxer.set("loader[" + name + "]", loader);
+                    $(loaderContainer).append(loader);
+                    loader = $(loaderContainer).find(" .ajaxer-loader");
                 }
 
                 loader = loader[0];
@@ -291,7 +297,7 @@
                 $(target).addClass("ajaxer-call");
                 var loaderTimeout = setTimeout(function () {
                     $(loader).addClass("ajaxer-call");
-                }, Ajaxer.parseTime(Ajaxer.get("debounce_loader")));
+                }, Ajaxer.parseTime(Ajaxer.get("loader_debounce["+name+"]") ?? Ajaxer.get("loader_debounce")));
 
                 var xhr = $.ajax({
                     url: Ajaxer.get("url[" + name + "]"),
