@@ -32,7 +32,7 @@
 
     var defaultAjaxer  = {
         method:"POST",
-        output:null,
+        output: "json",
         cancelable: false,
         retry_limit:1,
         debounce:1000,
