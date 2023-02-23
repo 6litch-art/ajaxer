@@ -32,7 +32,7 @@
 
     var defaultAjaxer  = {
         method:"POST",
-        output:"json",
+        output:null,
         cancelable: false,
         retry_limit:1,
         debounce:1000,
@@ -146,7 +146,7 @@
         Ajaxer.set("url["+name+"]", url);
     }
 
-    Ajaxer.setOutput = function(name, type)
+    Ajaxer.setOutput = function(name, dataType)
     {
         Ajaxer.set("output["+name+"]", dataType);
     }
