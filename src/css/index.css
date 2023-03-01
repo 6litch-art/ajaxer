@@ -7,7 +7,6 @@
         transform: translate3d(-50%, -50%, 0) rotate(360deg);
     }
 }
-
 .ajaxer-status:empty { display:none; }
 .ajaxer-status {
     margin-left: 45px;
@@ -24,6 +23,7 @@
     height: 0;
     overflow: hidden;
 }
+
 .ajaxer-loader.ajaxer-call:hover { background-color:#FCFCFCEE; cursor:pointer; }
 .ajaxer-loader.ajaxer-call {
     position: absolute;
@@ -46,7 +46,11 @@
     opacity:1;
 }
 
-.ajaxer-loader.ajaxer-call:after {
+.ajaxer-error .ajaxer-status
+{
+    margin-left:10px;
+}
+.ajaxer-loader.ajaxer-call:not(.ajaxer-error):after {
 
     animation: 0.5s linear infinite ajaxerLoader;
     animation-play-state: inherit;

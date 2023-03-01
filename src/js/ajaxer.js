@@ -199,7 +199,7 @@
         return (...args) => {
 
             timeout = Ajaxer.parseTime(timeout ?? Ajaxer.get("debounce["+name+"]") ?? Ajaxer.get("debounce"));
-            if(timeout == 0 || debounceTimer[name] == undefined) timeout = 1; // timeout not working if 0.. :o)
+            if(timeout == 0) timeout = 1; // timeout not working if 0.. :o)
 
             if(typeof(debounceTimer[name]) != "undefined") clearTimeout(debounceTimer[name]);
             debounceTimer[name] = setTimeout(() => { func.apply(this, args); }, timeout);
@@ -316,6 +316,8 @@
                             success.call(target, ...args);
                         });
 
+                        $(loader).find(".ajaxer-status").html("");
+
                         Ajaxer.unregister(xhr);
                     },
 
@@ -323,14 +325,13 @@
 
                         clearTimeout(loaderTimeout);
 
+                        $(loader).addClass("ajaxer-call");
+                        $(loader).find(".ajaxer-status").html(args[0].responseJSON);
+                        $(loader).one("click touchstart", function () {
+                            $(loader).removeClass("ajaxer-call");
+                        });
+
                         if(queryList[name].indexOf(xhr) > 0) {
-
-                            $(loader).addClass("ajaxer-call");
-                            $(loader).find(".ajaxer-status").html(args[0].responseJSON);
-
-                            $(loader).one("click touchstart", function () {
-                                $(loader).removeClass("ajaxer-call");
-                            });
 
                             if (++this.tryCount < this.retryLimit) {
                                 $.ajax(this);
