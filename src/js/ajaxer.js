@@ -299,7 +299,7 @@
                     $(loader).addClass("ajaxer-call");
                 }, Ajaxer.parseTime(Ajaxer.get("loader_debounce["+name+"]") ?? Ajaxer.get("loader_debounce")));
 
-                var xhr = $.ajax({
+                var response = $.ajax({
                     url: Ajaxer.get("url[" + name + "]"),
                     type: Ajaxer.get("method[" + name + "]") ?? Ajaxer.get("method"),
                     dataType: Ajaxer.get("output[" + name + "]") ?? Ajaxer.get("output"),
@@ -318,20 +318,27 @@
 
                         $(loader).find(".ajaxer-status").html("");
 
-                        Ajaxer.unregister(xhr);
+                        Ajaxer.unregister(response);
                     },
 
                     error: function (...args) {
 
+                        var xhr = args[0];
                         clearTimeout(loaderTimeout);
 
+                        var ret = xhr.responseJSON;
+                        var err = xhr.statusText == "error" ? "" : xhr.statusText;
+
+                        if (!ret && xhr.status) ret = "Error " + xhr.status + (err ? ": " + err : "");
+                        if (!ret) ret = "Unexpected error";
+
                         $(loader).addClass("ajaxer-call");
-                        $(loader).find(".ajaxer-status").html(args[0].responseJSON);
+                        $(loader).find(".ajaxer-status").html(ret);
                         $(loader).one("click touchstart", function () {
                             $(loader).removeClass("ajaxer-call");
                         });
 
-                        if(queryList[name].indexOf(xhr) > 0) {
+                        if(queryList[name].indexOf(response) > 0) {
 
                             if (++this.tryCount < this.retryLimit) {
                                 $.ajax(this);
@@ -346,7 +353,7 @@
                             error.call(target, ...args);
                         });
 
-                        Ajaxer.unregister(xhr);
+                        Ajaxer.unregister(response);
                     },
 
                     complete: function (...args) {
@@ -360,7 +367,7 @@
                     }
                 });
 
-                Ajaxer.register(name, xhr);
+                Ajaxer.register(name, response);
             }
 
         }.bind(this)())();
