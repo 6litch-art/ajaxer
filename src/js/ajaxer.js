@@ -252,6 +252,14 @@
         });
     }
 
+    Ajaxer.isJson = function(str)
+    {
+        try { JSON.parse(str); }
+        catch (e) { return false; }
+
+        return true;
+    }
+
     Ajaxer.send = function(name, data = {}, success = function() {}, error = function() {}, complete = function() {})
     {
         if( typeof(name) != "string" )
@@ -308,15 +316,29 @@
                     retryLimit : Ajaxer.get("retry_limit[" + name + "]") ?? Ajaxer.get("retry_limit"),
                     success: function (...args) {
 
-                        $(loader).addClass("ajaxer-success");
-                        $(loader).removeClass("ajaxer-call");
-                        $(target).each(function () {
+                        var status = args[0];
+                        if(typeof status !== 'object' ) {
 
-                            $(target).addClass("ajaxer-success");
-                            success.call(target, ...args);
-                        });
+                            $(loader).find(".ajaxer-status").html(status);
 
-                        $(loader).find(".ajaxer-status").html("");
+                            $(loader).addClass("ajaxer-call");
+                            $(loader).addClass("ajaxer-error");
+                            $(target).each(function () {
+
+                                $(target).addClass("ajaxer-error");
+                                error.call(target, ...args);
+                            });
+
+                        } else {
+
+                            $(loader).removeClass("ajaxer-call");
+                            $(loader).addClass("ajaxer-success");
+                            $(target).each(function () {
+
+                                $(target).addClass("ajaxer-success");
+                                success.call(target, ...args);
+                            });
+                        }
 
                         Ajaxer.unregister(response);
                     },
