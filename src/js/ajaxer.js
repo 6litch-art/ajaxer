@@ -348,11 +348,10 @@
                         var xhr = args[0];
                         clearTimeout(loaderTimeout);
 
-                        var ret = xhr.responseJSON;
-                        var err = xhr.statusText == "error" ? "" : xhr.statusText;
-
-                        if (!ret && xhr.status) ret = "Error " + xhr.status + (err ? ": " + err : "");
+                        var ret = xhr.responseJSON["response"] ?? xhr.responseJSON;
                         if (!ret) ret = "Unexpected error";
+                        if (xhr.status >= 400)
+                            ret = xhr.status + " ERROR" + (ret ? ': ' + ret : "");
 
                         $(loader).addClass("ajaxer-call");
                         $(loader).find(".ajaxer-status").html(ret);
