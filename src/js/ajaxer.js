@@ -348,16 +348,24 @@
                         var xhr = args[0];
                         clearTimeout(loaderTimeout);
 
-                        var ret = xhr.responseJSON["response"] ?? xhr.responseJSON;
-                        if (!ret) ret = "Unexpected error";
-                        if (xhr.status >= 400)
-                            ret = xhr.status + " ERROR" + (ret ? ': ' + ret : "");
+                        var ret = undefined;
+                        if(xhr.responseJSON != undefined) {
+                            ret = "response" in xhr.responseJSON ? xhr.responseJSON["response"] : xhr.responseJSON;
+                        }
+
+                        if (xhr.status >= 400) ret = xhr.status + " Error" + (ret ? ': ' + ret : "");
+                        else if(!ret) ret = "Unexpected error";
 
                         $(loader).addClass("ajaxer-call");
                         $(loader).find(".ajaxer-status").html(ret);
                         $(loader).one("click touchstart", function () {
-                            $(loader).removeClass("ajaxer-call");
-                        });
+
+                            $(loader).addClass("ajaxer-call");
+                            $(loader).find(".ajaxer-status").html("");
+                            $(loader).removeClass("ajaxer-error");
+                            $.ajax(this);
+
+                        }.bind(this));
 
                         if(queryList[name].indexOf(response) > 0) {
 
@@ -371,7 +379,6 @@
                         $(target).each(function () {
 
                             $(target).addClass("ajaxer-error");
-                            error.call(target, ...args);
                         });
 
                         Ajaxer.unregister(response);
