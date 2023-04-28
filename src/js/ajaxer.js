@@ -333,6 +333,7 @@
 
                             $(loader).removeClass("ajaxer-call");
                             $(loader).addClass("ajaxer-success");
+                            $(loader).removeClass("ajaxer-error");
                             $(target).each(function () {
 
                                 $(target).addClass("ajaxer-success");
@@ -354,7 +355,7 @@
                         }
 
                         if (xhr.status >= 400) ret = xhr.status + " Error" + (ret ? ': ' + ret : "");
-                        else if(!ret) ret = "Unexpected error";
+			            else if (!ret && xhr.statusText == "error") ret = "Unexpected error";
 
                         $(loader).addClass("ajaxer-call");
                         $(loader).find(".ajaxer-status").html(ret);
