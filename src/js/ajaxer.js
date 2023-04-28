@@ -260,6 +260,10 @@
         return true;
     }
 
+    Ajaxer.isDict = function(v) {
+        return typeof v==='object' && v!==null && !(v instanceof Array) && !(v instanceof Date);
+    }
+
     Ajaxer.send = function(name, data = {}, success = function() {}, error = function() {}, complete = function() {})
     {
         if( typeof(name) != "string" )
@@ -351,7 +355,7 @@
 
                         var ret = undefined;
                         if(xhr.responseJSON != undefined) {
-                            ret = "response" in xhr.responseJSON ? xhr.responseJSON["response"] : xhr.responseJSON;
+                            ret = Ajaxer.isDict(xhr.responseJSON) && "response" in xhr.responseJSON ? xhr.responseJSON["response"] : xhr.responseJSON;
                         }
 
                         if (xhr.status >= 400) ret = xhr.status + " Error" + (ret ? ': ' + ret : "");
