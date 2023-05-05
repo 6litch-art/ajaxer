@@ -361,7 +361,7 @@
                         if (xhr.status >= 400) ret = xhr.status + " Error" + (ret ? ': ' + ret : "");
 			            else if (!ret && xhr.statusText == "error") ret = "Unexpected error";
 
-                        $(loader).addClass("ajaxer-call");
+                        if(ret) $(loader).addClass("ajaxer-call");
                         $(loader).find(".ajaxer-status").html(ret);
                         $(loader).one("click touchstart", function () {
 
@@ -380,11 +380,14 @@
                             }
                         }
 
-                        $(loader).addClass("ajaxer-error");
-                        $(target).each(function () {
+                        if(ret) {
 
-                            $(target).addClass("ajaxer-error");
-                        });
+                            $(loader).addClass("ajaxer-error");
+                            $(target).each(function () {
+
+                                $(target).addClass("ajaxer-error");
+                            });
+                        }
 
                         Ajaxer.unregister(response);
                     },
