@@ -163,7 +163,7 @@
 
     Ajaxer.cancelable = function(name, cancelable = true)
     {
-        Ajaxer.set("cancelable["+name+"]", true);
+        Ajaxer.set("cancelable["+name+"]", cancelable);
     }
 
     Ajaxer.setDebounce = function(name, debounce)
