@@ -35,7 +35,8 @@
         output: "json",
         cancelable: false,
         retry_limit:1,
-        debounce:1000,
+        throttle:1000,
+        debounce:0,
         loader_debounce:1500,
     };
 
@@ -175,6 +176,15 @@
         Ajaxer.set("loader_debounce["+name+"]", debounce)
     }
 
+    Ajaxer.setThrottle = function(name, throttle)
+    {
+        Ajaxer.set("throttle["+name+"]", throttle)
+    }
+    Ajaxer.setLoaderThrottle = function(name, throttle)
+    {
+        Ajaxer.set("loader_throttle["+name+"]", throttle)
+    }
+
     Ajaxer.setLoaderContainer = function(name, el)
     {
         Ajaxer.set("loader_container["+name+"]", el);
@@ -199,21 +209,34 @@
         return (...args) => {
 
             timeout = Ajaxer.parseTime(timeout ?? Ajaxer.get("debounce["+name+"]") ?? Ajaxer.get("debounce"));
-            if(timeout == 0) timeout = 1; // timeout not working if 0.. :o)
+            if(timeout < 1) func.apply(this, args)
+            else {
+                
+                if(typeof(debounceTimer[name]) != "undefined") clearTimeout(debounceTimer[name]);
+                debounceTimer[name] = setTimeout(() => { func.apply(this, args); }, timeout);
+            }
+        };
+    }
 
-            if(typeof(debounceTimer[name]) != "undefined") clearTimeout(debounceTimer[name]);
-            debounceTimer[name] = setTimeout(() => { func.apply(this, args); }, timeout);
+    var throttleTimer = {};
+    Ajaxer.throttle = function (name, func, timeout = null){
+        
+        if( ! (name in throttleTimer) )
+            throttleTimer[name] = undefined;
+
+        return (...args) => {
+
+            if (typeof(throttleTimer[name]) != "undefined") return;
+
+            func.apply(this, args); 
+
+            timeout = Ajaxer.parseTime(timeout ?? Ajaxer.get("throttle["+name+"]") ?? Ajaxer.get("throttle"));
+            if(timeout < 1) throttleTimer[name] = undefined;
+            else throttleTimer[name] = setTimeout(() => { throttleTimer[name] = undefined; }, timeout);
         };
     }
 
     var queryList = {};
-    Ajaxer.xhr = function(name)
-    {
-        if(!(name in queryList))
-            queryList[name] = [];
-
-        return queryList[name];
-    }
 
     Ajaxer.abortAll = function()
     {
@@ -264,12 +287,12 @@
         return typeof v==='object' && v!==null && !(v instanceof Array) && !(v instanceof Date);
     }
 
-    Ajaxer.send = function(name, data = {}, success = function() {}, error = function() {}, complete = function() {})
+    Ajaxer.send = Ajaxer.xhr = function(name, data = {}, success = function() {}, error = function() {}, complete = function() {})
     {
         if( typeof(name) != "string" )
             console.error("Unexpected ajax request name received.");
 
-        return Ajaxer.debounce(name, () => function() {
+        return Ajaxer.throttle(name, () => Ajaxer.debounce(name, () => function() {
 
             if (Ajaxer.get("url[" + name + "]") == undefined) console.error("No target URL provided.");
             else {
@@ -307,9 +330,8 @@
                 }
 
                 $(target).addClass("ajaxer-call");
-                var loaderTimeout = setTimeout(function () {
-                    $(loader).addClass("ajaxer-call");
-                }, Ajaxer.parseTime(Ajaxer.get("loader_debounce["+name+"]") ?? Ajaxer.get("loader_debounce")));
+                var loaderDebounceTime = Ajaxer.parseTime(Ajaxer.get("loader_debounce["+name+"]") ?? Ajaxer.get("loader_debounce"));
+                var loaderTimeout = setTimeout(() => $(loader).addClass("ajaxer-call"), loaderDebounceTime);
 
                 var response = $.ajax({
                     url: Ajaxer.get("url[" + name + "]"),
@@ -406,7 +428,7 @@
                 Ajaxer.register(name, response);
             }
 
-        }.bind(this)())();
+        }.bind(this)())())();
     }
 
     $(window).on("load", function() { Ajaxer.onLoad(); });

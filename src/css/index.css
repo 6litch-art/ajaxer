@@ -17,6 +17,10 @@
     text-align:center;
 }
 
+.ajaxer-loader.ajaxer-success{
+    display:none;
+}
+
 .ajaxer-loader {
     transition: opacity 0.25s ease-out, margin 0.25s ease-out;
     opacity: 0;
@@ -28,6 +32,7 @@
 
 .ajaxer-loader.ajaxer-call:hover { background-color:#FCFCFCEE; cursor:pointer; }
 .ajaxer-loader.ajaxer-call {
+
     position: absolute;
     top: 50%;
     left: 50%;
