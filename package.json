@@ -1,6 +1,6 @@
 {
   "name": "@glitchr/ajaxer",
-  "version": "1.0.49",
+  "version": "1.0.50",
   "description": "AJAX query library",
   "main": "src/index.js",
   "repository": {
