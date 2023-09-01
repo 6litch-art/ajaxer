@@ -18,10 +18,12 @@
 }
 
 .ajaxer-loader {
-    transition: opacity 0.25s ease-out;
+    transition: opacity 0.25s ease-out, margin 0.25s ease-out;
     opacity: 0;
     height: 0;
+    margin-top:5px;
     overflow: hidden;
+    border-radius:30px;
 }
 
 .ajaxer-loader.ajaxer-call:hover { background-color:#FCFCFCEE; cursor:pointer; }
@@ -39,11 +41,11 @@
     height: auto;
     min-height: 60px;
     min-width: 60px;
-    border-radius:30px;
     box-shadow: 1px 1px 5px #0001;
     z-index:10;
 
     opacity:1;
+    margin-top:0px;
 }
 
 .ajaxer-error .ajaxer-status
