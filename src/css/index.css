@@ -13,7 +13,8 @@
     padding: 15px;
     margin-right:10px;
 
-    max-width: 500px;
+    overflow: scroll;
+    width: 100%;
     text-align:center;
 }
 
